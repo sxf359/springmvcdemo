@@ -1,0 +1,238 @@
+﻿@model  LMCMS.Areas.Admin.Controllers.UserManagerViewModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "员工管理";
+}
+@{
+    Layout = "_UserManage.cshtml";
+}
+
+
+@section pageStyle{
+
+}
+
+<div class="list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- #region 职位筛选条件区域 start -->
+            <div class="col-xs-12 no-padding">
+                <div class="container-fluid">
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <ul class="nav navbar-nav">
+                        <li class="">
+                            <input type="text" class="form-control  input-sm" id="name" name="name" placeholder="登录名、手机号、姓名" value="@ViewBag.name">&nbsp;&nbsp;&nbsp;&nbsp;
+                            部门：<select id="GroupGid" name="groupGid" class="form-control select2-container"></select>
+                            职务：<select id="RoleLevel" name="RoleLevel" class="form-control select2-container"></select>
+
+                        </li>
+                        <li>
+                            <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+
+                            </div>
+                        </li>
+                    </ul>
+                </div><!-- /.container-fluid -->
+            </div>
+        }
+    </div>
+    <div>
+
+        @Html.ActionLink("添加", "UserAdd", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+    </div>
+    <div class=" list-item padding">
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        编号
+                    </th>
+                    <th>
+                        登录名
+                    </th>
+
+                    <th>
+                        手机号
+                    </th>
+                    <th>
+                        姓名
+                    </th>
+
+                    <th>
+                        工号
+                    </th>
+                    <th>
+                        部门
+                    </th>
+                    <th>
+                        小组
+                    </th>
+
+                    <th>
+                        职务
+                    </th>
+
+                    <th>
+                        锁定
+                    </th>
+                    <th>
+                        时间
+                    </th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IID)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.UserName)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PhoneNumber)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.RealName)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EmployeeNumber)
+                        </td>
+                        <td class="GroupIid">
+                            @Html.DisplayFor(modelItem => item.BranchId)
+                        </td>
+                        <td class="GroupIid">
+                            @Html.DisplayFor(modelItem => item.GroupId)
+                        </td>
+                        <td class="position">
+                            @Html.DisplayFor(modelItem => item.RoleLevel)
+                        </td>
+                        <td>
+                            @item.LockedOut
+                        </td>
+                        <td>
+                            @item.CreateTime
+                        </td>
+                        <td class="text-center">
+                            @if (item.RoleLevel < 3)
+                            {
+                                <a href="/admin/usermanage/useredit?gid=@item.Id" class="" id="@item.Id">编辑</a> 
+                            }
+
+                            <a href="javascript:;" data-gid="@item.Id" data-bind="click:showPasswordManage">修改密码</a> |
+                            @if (item.LockedOut == "已锁定")
+                            {
+                                <a href="javascript:;" data-gid="@item.Id" data-bind="click:UnLockUser">解锁</a>
+                            }
+                            else
+                            {
+                                <a href="javascript:;" data-gid="@item.Id" data-bind="click:LockUser">锁定</a>
+                            }
+                            | <a href="javascript:;" data-gid="@item.Id" data-bind="click:DeleteUser">删除</a>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        @Html.PagedListPager(Model.Users, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { name = @ViewBag.name, groupGid = @ViewBag.groupGid, pageIndex = page }),
+                new PagedListRenderOptions
+                {
+                    LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                    LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                    LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                    LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                    DisplayPageCountAndCurrentLocation = true,
+                    PageCountAndCurrentLocationFormat = "{0}/{1}页",
+                    DisplayItemSliceAndTotal = true,
+                    ItemSliceAndTotalFormat = "共{2}条记录"
+                })
+        <div class="action text-center">
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/datetime.js"></script>
+    <script src="~/Scripts/app/admin/UserManage/UserManage.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(".GroupIid").each(function (index) {
+                var self = $(this);
+                $.post("/service/GetUserGroupNameByIid", { iid: self.text().trim() }, function (data) {
+                    self.text(data);
+                });
+            });
+
+            $(".position").each(function(index){
+                var self=$(this);
+                $.post("/service/GetpositionName", { id: self.text().trim() }, function (data) {
+                    self.text(data);
+                });
+            });
+
+            var groupGid = "@ViewBag.GroupGid";
+            $.post("/service/GetUserGroupListByLevel", {}, function (data) {
+                data.unshift({ id: "", text: "" });
+                $("#GroupGid").select2({
+                    data: data, //数据加载
+                });
+                if (groupGid != "") {
+                    $("#GroupGid").val(groupGid).trigger("change");
+                }
+
+            });
+
+            var roleLevel=@ViewBag.roleLevel;
+            $.post("/service/GetPositionList", {}, function (data) {
+                data.unshift({ id: "", text: "" });
+                $("#RoleLevel").select2({
+                    data: data, //数据加载
+                });
+                if (roleLevel != "") {
+                    $("#RoleLevel").val(roleLevel).trigger("change");
+                }
+
+            });
+
+        });
+
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+<script type="text/html" id="tmpl_PasswordManage">
+    <form class="form-horizontal" data-bind="with:PasswordManageVM">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">密码</label>
+            <div class="col-sm-4">
+                <input class="form-control" data-bind="value:Password" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">确认密码</label>
+            <div class="col-sm-4">
+                <input class="form-control" data-bind="value:ConfirmPassword" />
+            </div>
+        </div>
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+

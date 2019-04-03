@@ -1,0 +1,41 @@
+﻿@{
+    Layout = "~/Areas/admin/Views/Shared/_adminHome.cshtml";
+
+}
+
+@section pageStyle{
+   
+    @RenderSection("pageStyle", required: false)
+}
+<div class="row ">
+    <!-- #region 导览  -->
+    <div class="col-md-2">
+        <div class="list">
+            <div class="list-item padding">
+                <h3><i class="fa fa-tags"></i>员工管理</h3>
+
+                <div class="list-content-border @(new string[] {"userlist","useradd","useredit"}.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower()) ? "active-item" : "") ">
+                    <a href="/admin/usermanage/userlist">员工管理</a>
+                </div>
+                <div class="list-content-border @(new string[] {"usergrouplist","usergroupadd"}.Contains( ViewContext.RouteData.Values["action"].ToString().ToLower()) ? "active-item" : "") ">
+                    <a href="/admin/usermanage/usergrouplist">部门管理</a>
+                </div>
+                <div class="list-content-border @(new string[] {"adminloglist"}.Contains( ViewContext.RouteData.Values["action"].ToString().ToLower()) ? "active-item" : "") ">
+                    <a href="/admin/usermanage/AdminLoglist">操作日志</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- #region 导览  -->
+    <!-- #region 主页  -->
+    <div class="col-md-10">
+        @RenderBody()
+    </div>
+    <!-- #region 主页  -->
+</div>
+
+@section scripts{
+
+    @RenderSection("scripts", required: false)
+
+}
