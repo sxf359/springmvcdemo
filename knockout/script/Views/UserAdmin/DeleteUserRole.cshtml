@@ -1,0 +1,114 @@
+﻿@model  LMCMS.Areas.Admin.Controllers.RoleEditModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "移除用户角色";
+}
+@{
+    Layout = "_UserAdmin.cshtml";
+}
+ 
+<div class="list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- #region 用户筛选条件区域 start -->
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+                        
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="position-comp" name="username" placeholder="用户名" value="@ViewBag.username">&nbsp;
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+
+                                </li>
+                            </ul>
+                         
+                    </div><!-- /.container-fluid -->
+                </nav>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-7">
+        <div class="list">
+            <div class="list-item">
+                <div class="list-content">
+
+                    <table class="table table-bordered  table-striped">
+                        <tr class="heading"><th colspan="2">从角色【@ViewBag.roleName】移除用户</th></tr>
+                        <tr class="heading">
+                            <th>
+                                用户名
+                            </th>
+                            <th>
+                                从角色中移除
+                            </th>
+
+                        </tr>
+
+                        @foreach (var item in Model.MembersList)
+                        {
+                            <tr>
+                                <td class="tc">
+                                    @Html.DisplayFor(modelItem => item.UserName)
+                                </td>
+                                <td class="tc">
+                                    <input type="checkbox" data-target="chk" value="@item.Id" name="chk" />
+                                </td>
+
+                            </tr>
+                        }
+
+                    </table>
+                    @Html.PagedListPager(Model.MembersList, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+               {
+                   id = ViewBag.roleid,
+                   username = ViewBag.username,
+                   pageIndex = page
+               }),
+                            new PagedListRenderOptions
+                            {
+                                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                                DisplayPageCountAndCurrentLocation = true,
+                                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                                DisplayItemSliceAndTotal = true,
+                                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+                            })
+
+                    <div class="col-md-12 tc"><a href="javascript:;" data-rolename="@ViewBag.rolename" data-roleid="@ViewBag.roleid" title="移除" data-bind="click:DeleteUserRoleSub" class="btn btn-default">移除</a></div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/app/admin/UserAdmin/Role.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")

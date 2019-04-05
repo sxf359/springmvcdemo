@@ -1,0 +1,204 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.Models.Blacklist>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "黑名单列表";
+    Layout = "_customer.cshtml";
+}
+
+@section pageStyle{
+    <style>
+        .collapse {
+            display: block;
+        }
+    </style>
+}
+
+<div class=" list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+            {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="position-phone" name="phone" placeholder="手机号" value="@ViewBag.phone">&nbsp;&nbsp; 
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <div class="text-right">
+       
+        <a href="javascript:;"   data-bind="click:showPhone" class = "btn btn-primary btn-sm">添加手机号</a>
+        
+    </div>
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="nowrap">编号</th>
+                    <th class="nowrap">手机</th>
+                    
+                    <th class="nowrap">日期</th>
+                    
+
+                    <th class="nowrap">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class=" ">@item.IID</td>
+                    <td class="tc">@(item.Phone)</td>
+                      
+                        <td class="">@(item.CreateTime)</td>
+                   
+                    <td class="">
+                       <a href="javascript:;" data-gid="@item.GID" data-bind="click:DeleteBlackList">删除</a>
+                    </td>
+                </tr>
+                 
+            }
+
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+   {
+       phone = ViewBag.phone,
+       pageIndex = page
+   }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/layer-v3.0.3/layer/layer.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/Customer/Customer.js"></script>
+    <script type="text/javascript">
+        $(function () {
+             
+        });
+        
+        function DeleteBlackList(item,e)
+        {
+            var $n = $(e.currentTarget);
+            layer.confirm("确认要删除吗？", { title: "删除确认" }, function (index) {
+                
+                layer.close(index);
+                $.post("/admin/customer/DeleteBlackList", {gid:$n.data("gid")}, function (data) {
+                    layer.alert(data, { title: "删除", btn: ['确定'] }, function (index, item) {
+                        location.reload();
+                    });
+                });
+            });
+        }
+
+        //密码修改弹出框 
+        function showPhone(item, e) {
+            $n = $(e.currentTarget);
+            var vm = page.VM.PopupModalVM;
+            vm.option.title("添加手机");
+            vm.option.modallg(true);
+            vm.option.showCloseButton(true);
+            vm.option.showOKButton(true);
+            //当弹出框中确定按钮不可用时，使其可用，此问题在firefox浏览器中出现 
+            if ($(".submit").attr("disabled") == "disabled") {
+                $(".submit").removeAttr("disabled");
+            }
+            vm.AddPhoneVM = ko.mapping.fromJS({  Phone: "" });
+
+            vm.option.ok = function () { AddBlackList(vm); };
+            vm.templateToUse("tmpl_blank");
+            vm.templateToUse("tmpl_AddPhone");
+            $("#dlgPopupModal").modal("show");
+            //alert("a");
+            return false;
+        }
+
+
+        //重置密码
+        function AddBlackList(vm) {
+
+            //console.info("abc");
+            if (vm.AddPhoneVM.Phone() =="") {
+                alert("请输入手机号");
+                return;
+            }
+
+            $.post("/admin/customer/AddBlackList", { phone: vm.AddPhoneVM.Phone() }, function (data) {
+                if (data.indexOf("无权限") >= 0) {
+                    myModal.info("您无权进行此项操作");
+                    $("#dlgPopupModal").modal("hide");
+                }
+                else {
+                    if (data == "添加成功")
+                    {
+                        $("#dlgPopupModal").modal("hide");
+                        location.reload();
+                    }
+                    else
+                    {
+                        myModal.info(data);
+                        $("#dlgPopupModal").modal("hide");
+                    }
+                    
+                }
+            });
+
+        }
+       
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+<script type="text/html" id="tmpl_AddPhone">
+    <form class="form-horizontal" data-bind="with:AddPhoneVM">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">手机号</label>
+            <div class="col-sm-4">
+                <input class="form-control" data-bind="value:Phone" />
+            </div>
+        </div>
+        
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+
+
+
+

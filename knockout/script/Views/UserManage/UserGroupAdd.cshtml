@@ -1,0 +1,112 @@
+﻿@model LMSoft.CMS.Models.UserGroup
+@using SXF.Utils;
+
+@{
+    ViewBag.Title = "部门添加或修改";
+}
+@{
+    Layout = "_UserManage.cshtml";
+}
+@section pageStyle{
+
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">名称</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">层级</label>
+                    <div class="col-sm-10">                       
+                        <select id="level" name="level" class="form-control" ></select>
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">备注</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(m => m.Mark, new { @class = "form-control" ,style="width:400px;height:200px;"})
+                        @Html.ValidationMessageFor(m => m.Mark, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <input type="submit" value="保存" class="btn btn-primary btn-sm" id="ueForm" />
+
+                    @Html.HiddenFor(m=>m.GID)
+                    @Html.HiddenFor(m=>m.ParentId)
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //若是主管级别，只能添加自己部门下的类别
+            var isZhuguan =@ViewBag.AdminInfo.RoleLevel==2 ? true : false;  
+            $.post("/admin/usermanage/Getdepartlist", { }, function (data) {
+                console.info(data);
+                if ($.isArray(data)) {
+                     
+                    //arr = arr.sort();
+                    if (!isZhuguan)
+                    {
+                        data.unshift({ id: 0, text: "第一层" });
+                    }
+                    $("#level").select2({
+                        data: data,
+                        maximumSelectionLength: 30, //最多可多选4个
+                        minimumResultsForSearch: 20,
+                        language: "zh-CN"
+                    });
+
+
+                    var parent = $("#ParentId").val();
+                    //console.info(thisAnswer);
+                    //所属层级选择赋初始值
+                    $("#level").val(parent).trigger("change");
+
+                }
+            });
+            //所属层级选择改变，则相应隐藏自动ParentId也自动改变
+            $("#level").change(function () {
+                if (!$.IsNullOrEmpty($("#level").val()))
+                {
+                    $("#ParentId").val($("#level").val());
+                }
+                else
+                {
+                    $("#ParentId").val(0);
+                }
+
+
+            });
+        });
+
+
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+

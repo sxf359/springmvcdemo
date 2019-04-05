@@ -1,0 +1,191 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.Models.CustomerSort>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "客户类别配置";
+    Layout = "_customer.cshtml";
+}
+
+@section pageStyle{
+<style>
+    .collapse {
+        display: block;
+    }
+</style>
+}
+
+<div class=" list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="position-name" name="name" placeholder="名称" value="@ViewBag.name">&nbsp;&nbsp;
+                                    
+                                    &nbsp;&nbsp;大类：<select name="level1" id="level1" class="prov select2-container" style="width: 250px;"> </select>
+
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>
+    <div>
+        @Html.ActionLink("添加", "customerSortadd", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+    </div>
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="tc"><input type="checkbox" data-bind="click:g.selectAll" data-target="ck" /></th>
+                    <th class=" ">id</th>
+                    <th class=" ">名称</th>
+                    <th class=" ">父级</th>
+                    <th class=" ">层级</th>                   
+                    <th class=" ">显示</th>
+                    <th class=" ">日期</th>
+                    <th class=" ">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class="tc"><input type="checkbox" data-target="chk" value="@item.GID" name="chk" />&nbsp;</td>
+                    <td class=" ">@item.IID</td>
+                    <td class="tc">@(item.Name)</td>
+                    <td class="parent">@(item.Parent)</td>
+                    <td class="">@(item.Depth)</td>                    
+                    <td class="">@(item.Show==1?"是":"否")</td>                   
+                    <td class="">@(item.CreateTime)</td>
+                    <td class="">
+                        @Html.ActionLink("编辑", "CustomerSortadd", new {gid = item.GID})
+                         
+                        | <a href="javascript:;" data-gid="@item.GID" data-bind="click:DeleteSort">删除</a> 
+                        
+
+                    </td>
+                </tr>
+            }
+
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+            {
+                name = ViewBag.name,                 
+                level1 = ViewBag.level1,
+                pageIndex = page
+            }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+        <div class="action text-center">
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+
+
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //初始值
+            var level1 = "@(ViewBag.level1)";
+           
+            $(".parent").each(function () {
+                var $this=$(this);
+                $.post("/admin/customer/GetCustomerSortName", { id: $this.text() }, function (data) {
+                    $this.text(data);
+                });
+            });
+
+            $.post("/admin/customer/GetSubClassByParentId", { parent: 0 }, function (data) {
+                console.info(data);
+                if ($.isArray(data)) {
+                    var arr = [];
+                    $.each(data, function (index, item) {
+                        var a = {};
+                        a.id = item.IID;
+                        a.text = item.Name;
+                        arr.push(a);
+                    });
+                    //console.info(arr);
+                    arr = arr.sort();
+                    arr.unshift({ id: -1, text: "请选择" });
+                    $("#level1").select2({
+                        data:arr
+                    });
+
+                    if (level1 != "") {
+                        //所属行业选择赋初始值
+                        $("#level1").val(level1).trigger("change");
+                    }
+
+                }
+            });
+
+ 
+
+
+
+        });
+        function DeleteSort(item,e)
+        {
+            var gid = $(e.currentTarget).data("gid");
+            if($.IsNullOrEmpty(gid))
+            {
+                alert("参数错误");
+                return;
+            }
+            if (confirm("确定要删除吗，删除后不能恢复")) {
+                $.post("/admin/customer/customersortdelete", { gid: gid }, function (data) {
+                    if (data != "删除成功") {
+                        alert(data);
+                    }
+                    else { //删除成功，刷新页面
+                        location.reload();
+                    }
+                });
+            }
+
+        }
+         
+
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+
+

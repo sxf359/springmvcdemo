@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+</head>
+<body>
+    <p>使用方法</p>
+    <p>假设html页面有有一个class为add_test_img的标签，需要通过ajax访问后台，并在add_test_img标签中显示一些相关内容，在内容显示之前，可对add_test_img标签使用遮罩，防止在数据显示之前，被修改其中的内容</p>
+    <div class="cnblogs_code">
+<pre><span style="color: #008000;">//</span><span style="color: #008000;">显示遮罩</span>
+$(".add_test_img"<span style="color: #000000;">).showLoading();  
+</span><span style="color: #008000;">//</span><span style="color: #008000;">ajax调用</span>
+<span style="color: #000000;">$.ajax({
+                type: </span>"GET"<span style="color: #000000;">,
+                url: </span>"Api.php"<span style="color: #000000;">,
+                data: {ApiTarget: </span>'TestImage', op: 'paginateByClassId'<span style="color: #000000;">, prj_id: prj_id, class_id:class_id, page: index, per_page: items_per_page, user_id: user_id, start_date:start_date_str, end_date:end_date_str},
+                success: </span><span style="color: #0000ff;">function</span><span style="color: #000000;">(response){
+                   </span><span style="color: #008000;">//</span><span style="color: #008000;">对返回数据进行处理，并显示</span>
+        <span style="color: #008000;">//</span><span style="color: #008000;">......</span>
+        <span style="color: #008000;">//</span><span style="color: #008000;">去除遮罩</span>
+                    $(".add_test_img"<span style="color: #000000;">).hideLoading();
+                },
+                error: </span><span style="color: #0000ff;">function</span><span style="color: #000000;">(xhr) {
+                   </span><span style="color: #008000;">//</span><span style="color: #008000;">显示失败信息</span>
+        <span style="color: #008000;">//</span><span style="color: #008000;">......</span>
+        <span style="color: #008000;">//</span><span style="color: #008000;">去除遮罩</span>
+                    $(".add_test_img"<span style="color: #000000;">).hideLoading();
+                }
+            });</span></pre>
+    </div>
+    <p>&nbsp;</p>
+</body>
+</html>

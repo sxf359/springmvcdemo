@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "创建任务";
+}
+@{
+    Layout = "_customer.cshtml";
+}
+@section pageStyle{
+    <link href="/scripts/plugins/bootstrap-fileinput/bootstrap-fileinput.css" rel="stylesheet" />
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                @if (ViewBag.taskmainiid == 0)
+                {
+                    <div class="form-group col-md-12 margin-bottom-10">
+                        任务名：<input type="text" id="taskName" style="width:300px;" />
+                    </div>
+                }
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">excel文件</label>
+                    <div class="col-sm-10">
+                        <div id="containerFile">
+                            <a id="pickExcel" href="javascript:;">[选择excel文件]</a>
+                            <a id="uploadExcel" href="javascript:;">[上传excel文件]</a>
+                            <div id="filelist">Your browser doesn't have Flash, Silverlight or HTML5 support.</div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <input type="button" value="导入excel" class="btn btn-primary btn-sm" id="ueForm" data-bind="click:UploadExcel" />
+                    <input type="hidden" id="excelFile" />
+                    <input type="hidden" id="taskmainiid" value="@ViewBag.taskmainiid" />
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10 text-danger">
+                    注：Excel文件格式：手机号，姓名
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/scripts/plugins/bootstrap-fileinput/bootstrap-fileinput.js"></script>
+    <script src="~/Scripts/plugins/plupload/js/plupload.full.min.js"></script>
+    <script src="~/Scripts/app/shared/uploadfile.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#taskName").val(new Date().Format("yyyy-MM-dd"));
+        });
+
+        //上传excel文件代码/////////////////////////////////////////////////////////////////////
+        var uploaderExcel = new plupload.Uploader({
+            runtimes: 'html5,flash,silverlight,html4',
+            browse_button: 'pickExcel', // you can pass in id...
+            container: document.getElementById('containerFile'), // ... or DOM Element itself
+            url: '/CommonService/uploadfile',
+            flash_swf_url: '../js/Moxie.swf',
+            silverlight_xap_url: '../js/Moxie.xap',
+            multipart_params: { FileCategory: "excel" },
+            filters: {
+                max_file_size: '2mb',
+                mime_types: [
+                    { title: "excel文件", extensions: "xls,xlsx" }
+                ]
+            },
+
+            init: {
+                PostInit: function () {
+                    document.getElementById('filelist').innerHTML = '';
+                    document.getElementById('uploadExcel').onclick = function () {
+                        console.info("init");
+                        uploaderExcel.start();
+                        return false;
+                    };
+                },
+
+                FilesAdded: function (up, files) {
+                    plupload.each(files, function (file) {
+                        console.info("init2");
+                        document.getElementById('filelist').innerHTML += '<div id="' + file.id + '">' + file.name + ' (' + plupload.formatSize(file.size) + ') <b></b></div>';
+                    });
+                },
+                UploadProgress: function (up, file) {
+                    console.info("init1");
+                    document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+                },
+                FileUploaded: function (up, file, info) {
+
+                    $("#excelFile").val(JSON.parse(info.response).filename);
+                    console.info($("#excelFile").val());
+                },
+                Error: function (up, err) {
+                    console.info(err.code);
+
+                    if (err.code == -600) {
+                        alert("上传excel文件最大不能超过" + up.settings.filters.max_file_size);
+                        up.removeFile(err.file);
+
+                    }
+                    if (err.code == -601) {
+                        alert("上传excel文件类型只能是以下类型：" + up.settings.filters.mime_types[0].extensions);
+
+                    }
+                }
+            }
+        });
+
+        uploaderExcel.init();
+
+        function UploadExcel(item, e) { //点击确定按钮的时候
+            $.blockUI({
+                css: {
+                    border: 'solid silver 1px', color: '#999999 ', padding: '5px'
+                }, message: '<h4><img src="/Content/images/loading-spinner-blue.gif" style="width:22px;height:22px;" /> 处理中，请等待...</h4>'
+            });
+            var file = ($("#excelFile").val());
+            var taskmainiid = $("#taskmainiid").val();
+
+            $.post("/admin/customer/ImportExcelTotask", { file: file, taskName: $("#taskName").val(), taskmainiid: taskmainiid }, function (data) {
+                alert(data);
+                $.unblockUI();
+            });
+
+
+
+        }
+    </script>
+
+}
+
+
+

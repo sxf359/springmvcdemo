@@ -1,0 +1,117 @@
+﻿
+@{
+
+    ViewBag.Title = "主管派发红包";
+
+
+}
+@{
+    Layout = "_Customer.cshtml";
+}
+@section pageStyle{
+
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">类别</label>
+                    <div class="col-sm-10">
+                        <select name="level1" id="level1" class="prov select2-container" style="width: 150px;"> </select>
+                        &nbsp;&nbsp;小类：<select name="level2" id="level2" class="prov select2-container" style="width: 150px;"> </select>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">小组</label>
+                    <div class="col-sm-10">
+                        <select name="groups" id="groups" class="prov select2-container" style="width: 200px;" multiple="multiple"> </select>
+                    </div>
+                </div>
+
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <input type="submit" value="派发红包" class="btn btn-primary btn-sm" id="ueForm" />
+                    <input type="hidden" name="groupLeaders" id="groupLeaders" />
+
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/plupload/js/plupload.full.min.js"></script>
+    <script src="~/Scripts/app/shared/uploadfile.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/library/library.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var parent=@ViewBag.parent;
+            $.post("/service/GetGroupList", {parent:parent}, function (data) {
+                console.info(data);
+                $("#groups").select2({
+                    data: data,
+                    placeholder: '请选择',
+                    allowClear: true
+                });
+
+            });
+
+            $("#groups").change(function () {
+                if ($("#groups").val() != null) {
+                    $("#groupLeaders").val($("#groups").val());
+                    console.info($("#groupLeaders").val());
+                }
+
+            })
+
+            $.post("/service/getcustomersortlist", { parent: 0 }, function (data) {
+                data.unshift({ id: 0, text: "请选择" });
+                $("#level1").select2({
+                    data: data
+                });
+
+                    var arr = [];
+                    arr.unshift({ id: 0, text: "请选择" });
+                    $("#level2").select2({
+                        data: arr
+                    });
+
+            });
+
+
+            $("#level1").change(function () {
+                //console.info($("#level1").val());
+                $.post("/service/getcustomersortlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").empty();
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#level2").select2({
+                        data: data
+                    });
+
+                });
+            });
+
+        });
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+

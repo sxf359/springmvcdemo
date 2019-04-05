@@ -1,0 +1,65 @@
+﻿@model  LMSoft.FrameWork.Identity.ApplicationRole
+
+@{
+    ViewBag.Title = "角色管理";
+}
+@{
+    Layout = "_UserAdmin.cshtml";
+}
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">角色ID</label>
+                    <div class="col-sm-4">
+                        @if (ViewBag.IsModify == "1")
+                        {
+                            @Html.TextBoxFor(m => m.Id, new { @class = "form-control",@Readonly="true" })
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(m => m.Id, new { @class = "form-control" })
+                        }
+
+                        @Html.ValidationMessageFor(m => m.Id,"", new { @class="text-danger"})
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">角色名</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">角色描述</label>
+                    <div class="col-sm-4">
+                        @Html.TextAreaFor(m => m.Description, 3, 50, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">                    
+                    @Html.Hidden("isModify", @ViewBag.IsModify as string)
+                    <input type="submit" name="save" value="@(ViewBag.IsModify=="1" ? "角色编辑" : "角色添加")" />
+
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+
+    </script>
+
+}

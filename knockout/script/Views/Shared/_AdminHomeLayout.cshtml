@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "_AdminSiteLayout.cshtml";
+}
+
+@section customStyle{
+
+    @RenderSection("pageStyle", required: false)
+    @RenderSection("themeStyle", required: false)
+    <style>
+        .container {
+            width: 100%;
+        }
+    </style>
+}
+
+@RenderSection("fullwidth", required: false)
+
+<div class="header">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-md-3">
+
+            </div>
+            <div class="col-md-9">
+                <div class="header-navigation font-transform-inherit">
+                    <!-- BEGIN NAVIGATION -->
+                    @RenderSection("header", required: false)
+                    <!-- END NAVIGATION -->
+                </div>
+            </div>
+        </div>
+        <!-- BEGIN TOP BAR MENU -->
+        <!-- END TOP BAR MENU -->
+    </div>
+</div>
+
+<div class="main">
+    <div class="container">
+        @RenderBody()
+    </div>
+</div>
+
+@section scripts{
+    @RenderSection("scripts", required: false)
+}

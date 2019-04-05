@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/Areas/admin/Views/Shared/_adminHome.cshtml";
+
+}
+
+@section pageStyle{
+    
+    @RenderSection("pageStyle", required: false)
+}
+<div class="row ">
+    <!-- #region 导览  -->
+    <div class="col-md-2">
+        <div class=" list">
+            <div class=" list-item padding">
+                <h3><i class="fa fa-tags"></i>角色管理</h3>
+                <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("roleindex", StringComparison.OrdinalIgnoreCase) || ViewContext.RouteData.Values["action"].ToString().Equals("editrole", StringComparison.OrdinalIgnoreCase) ? "active-item" : "") ">
+                    <a href="/admin/useradmin/roleindex">角色管理</a>
+                </div>
+                <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("UserRoleAdminList", StringComparison.OrdinalIgnoreCase) || ViewContext.RouteData.Values["action"].ToString().Equals("addUserrole", StringComparison.OrdinalIgnoreCase) || ViewContext.RouteData.Values["action"].ToString().Equals("deleteUserrole", StringComparison.OrdinalIgnoreCase)  ? "active-item" : "") ">
+                    <a href="/admin/useradmin/UserRoleAdminList">角色用户管理</a>
+                </div> 
+                @*<div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("CompanyInfoSet", StringComparison.OrdinalIgnoreCase) ? "active-item" : "") ">
+                    <a href="/admin/useradmin/CompanyInfoSet">公司信息配置</a>
+                </div>
+                <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("AdminLogList", StringComparison.OrdinalIgnoreCase) ? "active-item" : "") ">
+                    <a href="/admin/useradmin/AdminLogList">管理员日志</a>
+                </div>*@
+            </div>
+        </div>
+    </div>
+    <!-- #region 导览  -->
+    <!-- #region 主页  -->
+    <div class="col-md-10">
+        @RenderBody()
+    </div>
+    <!-- #region 主页  -->
+</div>
+
+@section scripts{
+
+    @RenderSection("scripts", required: false)
+
+}

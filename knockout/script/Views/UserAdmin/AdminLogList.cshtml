@@ -1,0 +1,153 @@
+﻿@model PagedList.IPagedList<LMSoft.TrafficRulesTraining.Models.AdminLog>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "管理员日志";
+}
+@{
+    Layout = "_UserAdmin.cshtml";
+}
+
+
+@section pageStyle{
+    <link href="/Scripts/plugins/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+}
+
+<div class="list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- #region 职位筛选条件区域 start -->
+            <div class="col-xs-12 no-padding">
+                <div class="container-fluid">
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <ul class="nav navbar-nav">
+                        <li class="">
+                            <input type="text" class="form-control  input-sm" id="position-username" name="username" placeholder="操作员" value="@ViewBag.username">&nbsp;&nbsp;&nbsp;&nbsp;
+
+                        </li>
+                        <li>
+                            <div class=" input-group date form_datetime" data-date="@((ViewBag.start ?? DateTime.Now.AddMonths(-1)).ToShortDateString())">
+                                <input type="text" class="form-control  input-sm" id="start" name="start" style="width:100px;" placeholder="起始日期" value="@ViewBag.start"><span class="input-group-btn">
+                                    <button class="btn default date-reset btn-sm" type="button"><i class="fa fa-times"></i></button>
+                                    <button class="btn default date-set btn-sm" type="button"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </div>--
+                            <div class=" input-group date form_datetime" data-date="@((ViewBag.end ?? DateTime.Now.AddMonths(-1)).ToShortDateString())">
+                                <input type="text" class="form-control input-sm" id="end" name="end" style="width:100px;" placeholder="截止日期" value="@ViewBag.end">
+                                <span class="input-group-btn">
+                                    <button class="btn default date-reset btn-sm" type="button"><i class="fa fa-times"></i></button>
+                                    <button class="btn default date-set btn-sm" type="button"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                            </div>
+                        </li>
+                    </ul>
+                </div><!-- /.container-fluid -->
+            </div>
+        }
+    </div>
+
+    <div class=" list-item padding">
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+
+                    <th class="nowrap">
+                        编号
+                    </th>
+
+                    <th class="nowrap">
+                        操作员
+                    </th>
+                    <th class="nowrap">
+                        操作内容
+                    </th>
+
+                    <th class="nowrap">
+                        操作时间
+                    </th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IID)
+                        </td>
+
+                        <td>
+                            @Html.DisplayFor(modelItem => item.UserName)
+                        </td>
+                       
+                        <td class="operation">
+                            @Html.DisplayFor(modelItem => item.Operation )
+                        </td>
+
+                        <td>
+                            @item.CreateTime
+                        </td>
+
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { username = @ViewBag.username, start = @ViewBag.start, end = ViewBag.end, pageIndex = page }),
+                new PagedListRenderOptions
+                {
+                    LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                    LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                    LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                    LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                    DisplayPageCountAndCurrentLocation = true,
+                    PageCountAndCurrentLocationFormat = "{0}/{1}页",
+                    DisplayItemSliceAndTotal = true,
+                    ItemSliceAndTotalFormat = "共{2}条记录"
+                })
+        <div class="action text-center">
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/datetime.js"></script>
+    <script src="~/Scripts/app/admin/UserManage/UserManage.js"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="/assets/global/plugins/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(".operation").each(function (index) {
+                var self = $(this);
+                //console.info($(this).text());
+                var obj = eval("(" + self.text() + ")");
+                var str = "";
+                $.each(obj, function (index, item) {
+                    str+=index+"："+item+"<br/>";
+                });
+                self.html(str);
+            });
+        });
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+

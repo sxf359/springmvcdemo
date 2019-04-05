@@ -1,0 +1,155 @@
+﻿@model LMCMS.ViewModel.RegisterAdminEditViewModel
+@using SXF.Utils;
+
+@{
+    ViewBag.Title = "员工编辑";
+}
+@{
+    Layout = "_UserManage.cshtml";
+}
+@section pageStyle{
+
+<link href="/Scripts/plugins/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">用户名</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control",@readonly=true })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">手机</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.PhoneNumber, new {@class = "form-control"})
+                        @Html.ValidationMessageFor(m => m.PhoneNumber, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">工号</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.EmployeeNumber, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.EmployeeNumber, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">真实姓名</label>
+                    <div class="col-sm-10">
+                        @Html.TextBoxFor(m => m.RealName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.RealName, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">部门</label>
+                    <div class="col-sm-10">
+                        分部：<select id="level1" name="level1" class="form-control"></select>
+                        小组：<select id="level2" name="level2" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">职务</label>
+                    <div class="col-sm-10">
+                        @Html.DropDownListFor(m => m.RoleLevel, null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.RoleLevel, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <input type="submit" value="保存" class="btn btn-primary btn-sm" id="ueForm" />
+                    @Html.HiddenFor(m => m.GID)
+                    @Html.HiddenFor(m => m.BranchId)
+                    @Html.HiddenFor(m => m.GroupId)
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+ 
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $.post("/service/Getdepartlist", { parent: 0 }, function (data) {
+                //console.info(data);
+                if ($.isArray(data)) {
+
+                    //arr = arr.sort();
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#level1").select2({
+                        data: data,
+                        maximumSelectionLength: 30, //最多可多选4个
+                        minimumResultsForSearch: 20,
+                        language: "zh-CN"
+                    });                   
+                    //赋初始值
+                    $("#level1").val($("#BranchId").val()).trigger("change");
+                    //$.post("/service/Getdepartlist", { parent: $("#BranchId").val() }, function (data) {
+                    //    $("#level2").empty();
+                    //    data.unshift({ id: 0, text: "请选择" });
+                    //    $("#level2").select2({
+                    //        data: data,
+                    //        maximumSelectionLength: 30, //最多可多选4个
+                    //        minimumResultsForSearch: 20,
+                    //        language: "zh-CN"
+                    //    });
+                    //    //赋初始值     
+                    //    var groupId = $("#GroupId").val();
+                    //    console.info(groupId);
+                    //    setTimeout($("#level2").val(groupId).trigger("change"),1000)
+                    //});
+                }
+            });
+            //所属行业选择改变，则相应隐藏自动ParentId也自动改变
+            $("#level1").change(function () {
+                if (!$.IsNullOrEmpty($("#level1").val())) {
+                    $("#BranchId").val($("#level1").val());
+                }
+                else {
+                    $("#BranchId").val(0);
+                }
+                $.post("/service/Getdepartlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").empty();
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#level2").select2({
+                        data: data,
+                        maximumSelectionLength: 30, //最多可多选4个
+                        minimumResultsForSearch: 20,
+                        language: "zh-CN"
+                    });
+                    //$("#GroupId").val(0);
+                    var groupId = $("#GroupId").val();
+                    setTimeout($("#level2").val(groupId).trigger("change"), 1000);
+                });
+
+            });
+            $("#level2").change(function () {
+                if (!$.IsNullOrEmpty($("#level2").val())) {
+                    $("#GroupId").val($("#level2").val());
+                }
+                else {
+                    $("#GroupId").val(0);
+                }
+            });
+        });
+            
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+

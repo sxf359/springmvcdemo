@@ -1,0 +1,92 @@
+﻿@model  LMCMS.Areas.Admin.Controllers.UserManagerViewModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "角色管理";
+}
+@{
+    Layout = "_UserAdmin.cshtml";
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="list">
+            <div class="list-item">
+                @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "form1", role = "form", style = "" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="list-content">
+                        <div class="col-md-12"><a href="/admin/useradmin/editrole" class="btn btn-info" style="float:right;">添加角色</a></div>
+
+                        <table class="table table-bordered">
+
+                            <tr class="heading">
+                                <th>
+                                    角色ID
+                                </th>
+                                <th>
+                                    角色名
+                                </th>
+                                <th>操作</th>
+                            </tr>
+
+                            @foreach (var item in Model.Roles)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td class="text-center">
+                                        @Html.ActionLink("编辑角色", "EditRole", new { id = item.Id }) |
+
+                                        <a href="javascript:void();" data-bind="click:DeleteRole" data-id="@item.Id">删除角色</a>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+</div>
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/datetime.js"></script>
+    <script src="~/Scripts/app/admin/company/company.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        function DeleteRole(item, e) {
+            $n = $(e.currentTarget);
+            if (confirm("警告：删除角色将会同步删除该角色下的所有管理员，请慎重操作！")) {
+                var timestamp = new Date().getTime();
+                var input = { id: $n.data("id") };
+                //input = { id: "def" };
+                g.AddAntiForgeryToken(input, $("#form1"));
+                console.info(input);
+                $.post("/admin/useradmin/deleteRole", input, function (data) {
+                    if (data == "删除成功") {
+                        alert(data);
+                        location.reload();
+                    }
+                    else {
+                        alert(data);
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")

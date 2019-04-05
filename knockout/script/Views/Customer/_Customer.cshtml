@@ -1,0 +1,73 @@
+﻿@{
+    Layout = "~/Areas/admin/Views/Shared/_adminHome.cshtml";
+
+}
+
+@section pageStyle{
+
+    @RenderSection("pageStyle", required: false)
+}
+<div class="row ">
+    <!-- #region 导览  -->
+    <div class="col-md-2">
+        <div class=" list">
+            <div class=" list-item padding">
+                <h3><i class="fa fa-tags"></i>客户管理</h3>
+                <div class="list-content-border @(new string[] { "tasklist", "customerreviewadd","taskmainlist","taskdetaillist" }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())  ? "active-item" : "") ">
+                    @if (ViewBag.AdminInfo.RoleLevel >= 2)
+                    {
+                        <a href="/admin/customer/taskmainlist">我的任务</a>
+                    }
+                    else
+                    {
+                        <a href="/admin/customer/tasklist">我的任务</a>
+                    }
+                </div>
+                <div class="list-content-border @(new string[] { "index", "customerreviewaddforcustomer","Customeradd".ToLower() }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())   ? "active-item" : "") ">
+                    <a href="/admin/customer/index">我的客户</a>
+                </div>
+                @if (ViewBag.AdminInfo.RoleLevel == 0)
+                {
+                    <div class="list-content-border @(new string[] { "MyCreateCustomerList".ToLower() }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())   ? "active-item" : "") ">
+                        <a href="/admin/customer/MyCreateCustomerList">我的添加</a>
+                    </div>
+                }
+
+                <div class="list-content-border @(new string[] { "mydealedlist" }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())   ? "active-item" : "") ">
+                    <a href="/admin/customer/mydealedlist">我的成交</a>
+                </div>
+                <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("redbaglist", StringComparison.OrdinalIgnoreCase)  ? "active-item" : "") ">
+                    <a href="/admin/customer/redbaglist">抢红包</a>
+                </div>
+                @if (ViewBag.AdminInfo.RoleLevel >= 1)
+                {
+                    <div class="list-content-border @(new string[] { "recyclelist", "addphones" }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())  ? "active-item" : "")  ">
+                        <a href="/admin/customer/recyclelist">号码回收池</a>
+                    </div>
+                    <div class="list-content-border @(new string[] { "customersortlist", "customersortadd" }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())  ? "active-item" : "") ">
+                        <a href="/admin/customer/customersortlist">客户类别管理</a>
+                    </div>
+                    <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("IntentionalityList", StringComparison.OrdinalIgnoreCase)   ? "active-item" : "") ">
+                        <a href="/admin/customer/IntentionalityList">客户意向度管理</a>
+                    </div>
+                    <div class="list-content-border @(ViewContext.RouteData.Values["action"].ToString().Equals("ShowBlackList", StringComparison.OrdinalIgnoreCase)   ? "active-item" : "") ">
+                        <a href="/admin/customer/ShowBlackList">黑名单管理</a>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+    <!-- #region 导览  -->
+    <!-- #region 主页  -->
+    <div class="col-md-10">
+        @RenderBody()
+    </div>
+    <!-- #region 主页  -->
+</div>
+
+@section scripts{
+
+    @RenderSection("scripts", required: false)
+
+}

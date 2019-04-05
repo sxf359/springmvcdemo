@@ -1,0 +1,58 @@
+﻿@model LMSoft.CMS.Models.DailyLog
+@using SXF.Utils;
+
+@{
+
+    ViewBag.Title = "添加日志";
+
+
+}
+@{
+    Layout = "_work.cshtml";
+}
+@section pageStyle{
+
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        
+            <div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-1 control-label text-right">标题</label>
+                    <div class="col-sm-6">
+                       @Html.LabelFor(m=>m.Title)
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+
+                    <label class="col-sm-1 control-label text-right">内容</label>
+                    <div class="col-sm-8"  >
+                        @Html.Raw(Model.Content)
+                    </div>
+                </div>
+
+                 
+            </div>
+         
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/plupload/js/plupload.full.min.js"></script>
+    <script src="~/Scripts/app/shared/uploadfile.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/library/library.js"></script>
+     
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+

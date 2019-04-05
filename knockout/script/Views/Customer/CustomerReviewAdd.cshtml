@@ -1,0 +1,182 @@
+﻿@model LMSoft.CMS.ViewModels.CustomerReviewAddViewModel
+@using SXF.Utils;
+
+@{
+     
+        ViewBag.Title = "添加回访记录";
+    
+    
+}
+@{
+    Layout = "_Customer.cshtml";
+}
+@section pageStyle{
+
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                 
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">姓名</label>
+                    <div class="col-sm-3">
+                        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                    </div>
+                      <label class="col-sm-2 control-label text-right">手机</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control",@readonly=true })
+                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                
+                 <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">公司</label>
+                    <div class="col-sm-3">
+                        @Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.CompanyName, "", new { @class = "text-danger" })
+                    </div>
+                      <label class="col-sm-2 control-label text-right">意向度</label>
+                    <div class="col-sm-4">
+                        @Html.DropDownListFor(m => m.IntentionalityId, null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.IntentionalityId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">类别</label>
+                    <div class="col-sm-10">
+
+                        大类：<select name="level1" id="level1" class="prov select2-container" style="width: 200px;"> </select>
+                        小类：<select name="level2" id="level2" class="city select2-container" style="width: 200px;"> </select>
+
+                    </div>
+                </div>
+
+
+                 
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">客户备注</label>
+                    <div class="col-sm-3">
+                        @Html.TextAreaFor(m => m.Mark,  new { @class = "form-control",style="width:500px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.Mark, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">回访状态</label>
+                    <div class="col-sm-10">
+                        @foreach (var item in Enum.GetValues(typeof(LMSoft.CMS.ViewModels.ReviewStatus)))
+                        {
+                            @Html.RadioButtonFor(m => m.ReviewStatus,(int)item, new { @class = "form-control",style="margin-left:15px;" })                            <span class="selectRadio">@EnumDescription.GetFieldText((LMSoft.CMS.ViewModels.ReviewStatus)item)</span>
+                        }
+                        
+                        @Html.ValidationMessageFor(m => m.ReviewStatus, "", new { @class = "text-danger" })
+                    </div>
+                   
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">回访备注</label>
+                    <div class="col-sm-4">
+                        @Html.TextAreaFor(m => m.ReviewMark,  new { @class = "form-control",style="width:500px;height:100px;" })
+                        @Html.ValidationMessageFor(m => m.ReviewMark, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label text-right">其他设定</label>
+                    <div class="col-sm-2 text-center" >
+                        @Html.CheckBoxFor(m => m.AddCustomer, new {  })
+                        <span class="text-center">加为客户</span>
+                        @Html.ValidationMessageFor(m => m.AddCustomer, "", new { @class = "text-danger" })
+                        
+                    </div>
+                     
+                    <label class="col-sm-2 control-label text-right">回访方式</label>
+                    <div class="col-sm-2">
+                        @Html.DropDownListFor(m => m.ReviewMode, null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.ReviewMode, "", new { @class = "text-danger" })
+                    </div>  
+                </div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <div class="col-sm-2 text-right"><input type="submit" value="保存" class="btn btn-primary btn-lg" id="ueForm" /></div>
+                    @Html.HiddenFor(m=>m.TaskGid)
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script> 
+    <script src="~/Scripts/plugins/plupload/js/plupload.full.min.js"></script>
+    <script src="~/Scripts/app/shared/uploadfile.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/library/library.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            var level1 =@ViewBag.level1;
+            var level2=@ViewBag.level2;
+            $.post("/service/getcustomersortlist", { parent: 0 }, function (data) {
+                $("#level1").select2({
+                    data:data
+                });
+                //设置初始值
+                if (level1 != -1)
+                {
+                    $("#level1").val(level1).trigger("change"); 
+                }
+                
+                $.post("/service/getcustomersortlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").select2({
+                        data: data
+                    });
+                    if (level2 != -1)
+                    {
+                        setTimeout($("#level2").val(level2).trigger("change"),1000); 
+                    }
+                    
+                });
+            });
+
+            $("#level1").change(function () {
+                console.info($("#level1").val());
+                $.post("/service/getcustomersortlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").empty();
+                    $("#level2").select2({
+                        data: data
+                    });
+                    
+                });
+            });
+
+            $("#ReviewMark").val($("input[name=ReviewStatus]:checked").next().text()); 
+            $("input[name=ReviewStatus]").click(function () {
+                console.info($(this).val()); 
+                $("#ReviewMark").val($(this).next().text());
+            });
+            //点击单选按钮后面的文字说明自动使相应的单选按钮处于选中状态
+            $(".selectRadio").click(function () {
+                //console.info($(this).prev(":radio"));
+                $(this).prev(":radio").prop("checked", true);
+            });
+        });
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+

@@ -1,0 +1,73 @@
+﻿@model LMSoft.CMS.Models.Intentionality
+@using SXF.Utils;
+
+@{
+    ViewBag.Title = "客户意向度添加";
+}
+@{
+    Layout = "_Customer.cshtml";
+}
+@section pageStyle{
+ 
+
+}
+
+<div class=" list">
+    <div class="list-item padding">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+
+            @Html.AntiForgeryToken()
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div>
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">名称</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(m => m.Name, new {@class = "form-control"})
+                        @Html.ValidationMessageFor(m => m.Name, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+                
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <label class="col-sm-2 control-label">回访天数</label>
+                    <div class="col-sm-4">
+                        @Html.TextBoxFor(m => m.Days, null, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Days, "", new { @class = "text-danger" })
+                    </div>
+                </div> 
+
+                <div class="form-group col-md-12 margin-bottom-10">
+                    <input type="submit" value="保存" class="btn btn-primary btn-sm" id="ueForm" />
+                    @Html.HiddenFor(m=>m.GID)
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
+
+@section scripts{
+<script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+<script src="~/assets/global/plugins/bootstrap-fileinput/bootstrap-fileinput.js"></script>
+<script src="~/Scripts/plugins/plupload/js/plupload.full.min.js"></script>
+<script src="~/Scripts/app/shared/uploadfile.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+<script src="~/Scripts/app/admin/library/library.js"></script>
+    <script type="text/javascript">
+        $(function () {
+           
+            
+
+        });
+      
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script> 
+
+
+
+

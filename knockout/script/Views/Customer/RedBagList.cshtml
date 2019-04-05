@@ -1,0 +1,288 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.ViewModels.CustomerViewModel>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "抢红包";
+    Layout = "_customer.cshtml";
+}
+
+@section pageStyle{
+    <style>
+        .collapse {
+            display: block;
+        }
+    </style>
+}
+
+<div class=" list"> 
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+            {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid"> 
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">  
+                                    &nbsp;&nbsp;大类：<select name="level1" id="level1" class="prov select2-container" style="width: 150px;"> </select>
+                                    &nbsp;&nbsp;小类：<select name="level2" id="level2" class="prov select2-container" style="width: 150px;"> </select> 
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+                                </li>
+                            </ul>
+                             
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="nowrap ">编号</th>
+                    <th class=" ">手机</th>
+                    <th class=" ">姓名</th>
+                    <th class="nowrap ">公司</th>
+                    <th class=" ">类别</th>
+                    <th class=" ">隶属</th>
+                    <th class="nowrap ">意向</th>                     
+                    <th class=" ">冻结</th>
+                    <th class="nowrap ">派发状态</th>
+                    <th class="nowrap ">日期</th>
+                    <th class=" ">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class=" ">@item.IID</td>
+                    <td class="tc phoneInfo">@(item.Phone)</td>
+                    <td class="">@(item.Name)</td>
+                    <td class="">@(item.CompanyName)</td>
+                    <td class="thisSort">@(item.SortId)</td>
+                    <td class="thisAdmin">@item.AdminId</td>
+                    <td class="thisIntentionnality">@item.IntentionalityId</td>
+                    <td class=" ">@(item.Frozen ? "已冻结" : "未冻结")</td>
+                    <td class="">@(item.Recycle==2?"派发中":"未派发")</td>
+                    <td class="">@(item.CreateTime)</td>
+                    <td class="">
+                        <a href="javascript:;" data-iid="@item.IID" data-bind="click:QueryReview">查看回访</a>
+                        <a href="javascript:;" data-gid="@item.GID" data-bind="click:showCustomer">查看客户资料</a>
+                        <a href="javascript:;" data-gid="@item.GID" data-bind="click:GrabRedBag">抢红包</a>
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td colspan="12">
+                        <table class="table table-bordered">
+                        <tr>
+                            <th class="col-xs-2">回访人</th> 
+                            <th class="col-xs-8" >备注</th>
+                            <th class="col-xs-2" >时间</th>
+                        </tr>
+
+                        @foreach (var subItem in item.CustomerReviewViewCollection)
+                        {
+                            <tr>
+                                <td  class="col-xs-2 thisAdmin">@subItem.AdminId</td>
+                                <td  class="col-xs-2">@subItem.Mark</td>
+                                <td  class="col-xs-8">@subItem.CreateTime</td>
+                            </tr>
+                        }
+                        </table>
+                    </td>
+                </tr>
+            }
+
+        </table>
+     
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+      {
+          level1 = ViewBag.level1,
+          level2 = ViewBag.level2, 
+          pageIndex = page
+      }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+
+
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/layer-v3.0.3/layer/layer.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>    
+    <script src="~/Scripts/app/admin/Customer/Customer.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var level1 =@ViewBag.level1 ;
+            var level2=@ViewBag.level2 ;
+            $.post("/service/getcustomersortlist", { parent: 0 }, function (data) {
+                data.unshift({ id: 0, text: "请选择" });
+                $("#level1").select2({
+                    data: data
+                });
+                console.warn("level1"+level1);
+                if (level1 > 0) {
+                    console.warn("abc");
+                    $("#level1").val(level1).trigger("change");
+                    console.info($("#level1").val());
+                }
+                else {
+                    var arr = [];
+                    arr.unshift({ id: 0, text: "请选择" });
+                    $("#level2").select2({
+                        data: arr
+                    });
+                }
+            });
+
+
+            $("#level1").change(function () {
+                //console.info($("#level1").val());
+                $.post("/service/getcustomersortlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").empty();
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#level2").select2({
+                        data: data
+                    });
+                    if (level2 > 0) {
+                        setTimeout($("#level2").val(level2).trigger("change"), 1000);
+                        //console.info($("#level2").val());
+                    }
+                });
+            });
+            //类名加载
+            $(".thisSort").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetCustomerSortName", { iid: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            //管理员名加载
+            $(".thisAdmin").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetadminName", { adminId: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            //意向度加载
+            $(".thisIntentionnality").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetIntentionality", { iid: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            $(".thisReviewStatus").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/Getreviewstatus", { status: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+
+            $(".phoneInfo").each(function (index) {
+                var self = $(this);
+                $.post("/service/GetPhoneAddressInfo", { phone: self.text() }, function (data) {
+                    self.text(self.text() + "  " + data);
+                });
+            });
+        });
+
+        
+
+         
+        function GrabRedBag(item, e)
+        {
+            //console.info($(e.currentTarget));
+            //console.info($(e.currentTarget).data("gid"));
+            //return;
+            $.post("/admin/customer/GrabRedBag", {gid:$(e.currentTarget).data("gid")}, function (data) {
+                   
+                    layer.alert(data, {
+                        title: "抢红包操作",
+                        btn: ['确定']
+                    },
+                        function(index, item) {
+                            console.info("a");
+                             
+                                location.reload();
+                            
+                            
+                        }
+                    );
+                });
+        }
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+<script type="text/html" id="tmpl_QueryCustomer">
+    <form class="form-horizontal" data-bind="with:CustomerVM">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">姓名</label>
+            <div class="col-sm-4" data-bind="text:Name">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">手机</label>
+            <div class="col-sm-4" data-bind="text:Phone">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">公司</label>
+            <div class="col-sm-4" data-bind="text:CompanyName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">类别</label>
+            <div class="col-sm-4" data-bind="text:Sort">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">意向度</label>
+            <div class="col-sm-4" data-bind="text:Intentionality">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">备注</label>
+            <div class="col-sm-10" data-bind="text:Mark">
+
+            </div>
+        </div>
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+
+
+
+
+
+

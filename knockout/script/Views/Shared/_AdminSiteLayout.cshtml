@@ -1,0 +1,101 @@
+﻿@using Microsoft.AspNet.Identity
+<!DOCTYPE html>
+<html lang="en">
+<!-- Head BEGIN -->
+@{ViewBag.SiteTitle = "中之天客户管理系统";}
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=9" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="qc:admins" content="45532367776361426375" />
+    <meta property="qc:admins" content="1314007377613774156375" />
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>@ViewBag.Title - @ViewBag.SiteTitle</title>
+    @Styles.Render("~/Content/basicCSS")
+    @Styles.Render("~/Content/customCSS")
+
+
+    @RenderSection("customStyle", required: false)
+    @RenderSection("pageStyle", required: false)
+    @RenderSection("themeStyle", required: false)
+
+    <style>
+        /* #region 让footer永远在页面底部*/
+        #container {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+        }
+
+        #page {
+            padding-bottom: 60px; /*高度等于footer的高度*/
+        }
+
+        .footer {
+            position: relative;
+            margin-top: -60px; /*等于footer的高度*/
+            height: 60px;
+            clear: both;
+        }
+        /* #endregion 让footer永远在页面底部*/
+    </style>
+</head>
+<!-- Head END -->
+<body class="corporate">
+    <div id="container">
+        <div id="page">
+
+            <!-- BEGIN TOP BAR -->
+            <div class="pre-header hidden-xs hidden-sm ">
+                <div class="container">
+                    <div class="row">
+                        <!-- BEGIN TOP BAR LEFT PART -->
+                        <div class="col-md-6 col-sm-6 additional-site-info">
+                            <ul class="list-unstyled list-inline">
+                                <li><i class="fa"></i><span>中之天客户管理系统</span></li>
+                            </ul>
+                        </div>
+                        <!-- END TOP BAR LEFT PART -->
+                        <!-- BEGIN TOP BAR MENU -->
+                        <div class="col-md-6 col-sm-6 additional-nav">
+                            @Html.Partial("_AdminLoginPartial")
+                        </div>
+                        <!-- END TOP BAR MENU -->
+                    </div>
+                </div>
+            </div>
+            <!-- END TOP BAR -->
+            @RenderBody()
+
+        </div>
+    </div>
+
+    <!-- Load javascripts at bottom, this will reduce page load time -->
+    <!-- BEGIN CORE PLUGINS (REQUIRED FOR ALL PAGES) -->
+    <!--[if lt IE 9]>  <link rel="stylesheet" href="//static.segmentfault.com/global/css/ie.css?" />
+    <script src="//static.segmentfault.com/global/js/html5shiv.js?"></script>
+    <script src="//static.segmentfault.com/global/js/respond.js?"></script>
+    <![endif]-->
+    @if (!Request.IsAuthenticated)
+    {
+        @Html.Partial("_login");
+    }
+
+
+    @Scripts.Render("~/bundles/javascript")
+
+    <!-- END CORE PLUGINS -->
+    <script>
+        page.user.isLogined=@(Request.IsAuthenticated ? "true" : "false");
+        page.user.userName = '@User.Identity.GetUserName()';
+        page.user.userID = '@User.Identity.GetUserId()';
+        page.user.role = '@(Request.Cookies["role"] ==null?"":Request.Cookies["role"].Value)';
+        page.user.session = '@(Request.Cookies["SessionID"] == null ? "" : Request.Cookies["SessionID"].Value)';
+    </script>
+    @RenderSection("scripts", required: false)
+    
+</body>
+
+</html>

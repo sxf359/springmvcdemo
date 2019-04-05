@@ -1,0 +1,140 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.Models.UserGroup>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "部门管理";
+}
+@{
+    Layout = "_UserManage.cshtml";
+}
+
+
+@section pageStyle{
+}
+
+<div class=" list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <!-- #region 职位筛选条件区域 start -->
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <!-- Collect the nav links, forms, and other content for toggling -->
+
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="position-comp" name="name" placeholder="名称" value="@ViewBag.name">&nbsp;
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+
+                                </li>
+                            </ul>
+
+                    </div><!-- /.container-fluid -->
+                </nav>
+            </div>
+        }
+    </div>
+    <div>
+       
+        @Html.ActionLink("添加部门", "UserGroupAdd", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+       
+    </div>
+    <div class=" list-item padding">
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        编号
+                    </th>
+                    <th>
+                        组名
+                    </th>
+                    <th>
+                        隶属
+                    </th>
+                    <th>
+                        备注
+                    </th>
+
+
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.IID)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td class="thisParent">
+                            @Html.DisplayFor(modelItem => item.ParentId)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Mark)
+                        </td>
+
+
+                        <td class="text-center">
+                            <a href="/admin/usermanage/usergroupadd?gid=@item.GID" class="">编辑</a>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action("usergrouplist", new { name = @ViewBag.name, pageIndex = page }),
+                new PagedListRenderOptions
+                {
+                    LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                    LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                    LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                    LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                    DisplayPageCountAndCurrentLocation = true,
+                    PageCountAndCurrentLocationFormat = "{0}/{1}页",
+                    DisplayItemSliceAndTotal = true,
+                    ItemSliceAndTotalFormat = "共{2}条记录"
+                })
+        <div class="action text-center">
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/datetime.js"></script>
+    <script src="~/Scripts/app/admin/UserManage/UserManage.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $(".thisParent").each(function () {
+                var $this = $(this);
+                $.post("/admin/usermanage/GetUserGroupNameByIID", { iid: $this.text().trim() }, function (data) {
+                    $this.text(data);
+                });
+            });
+        });
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+

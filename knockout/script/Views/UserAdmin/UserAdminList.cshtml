@@ -1,0 +1,140 @@
+﻿@model  LMCMS.Areas.Admin.Controllers.UserManagerViewModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "用户管理";
+}
+<div class="row">
+    <div class="col-md-3">
+        <div class="list">
+            <div class="list-item">
+                <div class="list-content">
+                     
+                    <table class="table table-bordered">
+                         
+                        <tr class="heading">
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 角色码
+                            </th>
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 角色名
+                            </th>
+                            <th>操作</th>
+                        </tr>
+
+                        @foreach (var item in Model.Roles)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Id)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td class="text-center">
+                                    @*Html.ActionLink("编辑", "Edit", new { id = item.GID }, new { @class = "" }) |*@
+                                    @*Html.ActionLink("删除", "Delete", new { id = item.GID }, new { @class = "" })|*@
+                                    <a href="?role=@item.Id" class="" id="@item.Id">查看</a>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                    <div>
+                        <a href="~/admin/UserAdmin/useradminlist">所有用户</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="list">
+            <div class="list-item">
+                <div class="list-content">
+                    <table class="table table-bordered">
+                        <tr class="heading">
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 名称
+                            </th>
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 邮箱
+                            </th>
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 手机号
+                            </th>
+                            <th>
+                                @*Html.DisplayNameFor(model => model.Type)*@ 角色
+                            </th>
+                            <th>操作</th>
+                        </tr>
+
+                        @foreach (var item in Model.Users)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.UserName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Role)
+                                </td>
+                                <td class="text-center"> 
+                                    
+                                    <a href="javascript:void()" class="" data-bind="click:editUser" id="@item.Id">查看</a>
+                                </td>
+                            </tr>
+                        }
+
+                    </table>
+                    @Html.PagedListPager(Model.Users, page => Url.Action("UserAdminList", new { pageIndex = page, role = ViewBag.Role }),
+                new PagedListRenderOptions
+                {
+                    LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                    LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                    LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                    LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                    DisplayPageCountAndCurrentLocation = true,
+                    PageCountAndCurrentLocationFormat = "{0}/{1}页",
+                    DisplayItemSliceAndTotal = true,
+                    ItemSliceAndTotalFormat = "共{2}条记录"
+                })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/datetime.js"></script>
+    <script src="~/Scripts/app/admin/company/company.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+
+    </script>
+
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+<script type="text/html" id="tmpl_Use">
+    <form class="form-horizontal" data-bind="with:UserRoleVM">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">修改角色</label>
+            <div class="col-sm-4">
+                <select class="form-control" data-bind="value:role">
+                    <option value="admin">超级管理员</option>
+                    <option value="finance">财务管理员</option>
+                    <option value="audit">审核管理员</option>
+                </select>
+            </div>
+        </div>
+
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")

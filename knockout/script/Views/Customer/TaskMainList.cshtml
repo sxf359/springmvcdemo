@@ -1,0 +1,182 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.Models.TaskMain>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "任务列表";
+    Layout = "_customer.cshtml";
+}
+
+@section pageStyle{
+    <style>
+        .collapse {
+            display: block;
+        }
+    </style>
+}
+
+<div class=" list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+        {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="name" name="name" placeholder="任务名" value="@ViewBag.name">&nbsp;&nbsp;
+
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <div>
+        @if (ViewBag.AdminInfo.RoleLevel >= 2)  //表示是主管以上级别，派发任务给组长
+        {
+            @Html.ActionLink("创建任务", "ImportExcelToTask", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+            @Html.ActionLink("分配", "DistributeHeadman", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+        }
+        else if (ViewBag.AdminInfo.RoleLevel == 1)   //表示是组长级别，派发任务给组员
+        {
+            @Html.ActionLink("分配", "DistributeOperator", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+        }
+
+    </div>
+
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="nowrap">编号</th>
+                    <th class="nowrap">任务名</th>
+                    <th class="nowrap">号码总数</th>
+                    <th class="nowrap">未完成</th>
+                    <th class="nowrap">已完成</th>
+                    <th class="nowrap">意向客户</th>
+                    <th class="nowrap">主管</th>
+                    <th class="nowrap">日期</th>
+                    <th class="nowrap">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class=" ">@item.IID</td>
+                    <td class=" ">@item.Name</td>
+                    <td class="tc">@(item.PhoneSum)</td>
+                    <td class="">@(item.UnfinishedSum)</td>
+                    <td class="">@(item.FinishedSum)</td>
+                    <td class="">@(item.IntentionSum)</td>
+                    <td class="thisAdmin">@item.Director</td>
+                    <td class="">@(item.CreateTime)</td>
+                    <td class="">
+                        <a href="/admin/customer/taskdetaillist?taskmainiid=@item.IID">查看</a>
+                        <a href="/admin/customer/ImportExcelToTask?taskmainiid=@item.IID">追加号码</a>
+                        @if (ViewBag.AdminInfo.RoleLevel == 2)  //表示是主管
+                        {
+                            <a href="/admin/customer/Distribute?taskmainiid=@item.IID">分配</a>
+                        }
+                        <a href="javascript:;" data-iid="@item.IID" data-bind="click:BatDeleteTask">批量删除</a>
+                    </td>
+                </tr>
+
+            }
+
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+   {
+       name = ViewBag.name,
+       pageIndex = page
+   }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+        <div class="action text-center">
+        </div>
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/layer-v3.0.3/layer/layer.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/Customer/Customer.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+
+            //管理员名加载
+            $(".thisAdmin").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetadminName", { adminId: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+
+
+
+
+        });
+
+
+        function BatDeleteTask(item, e) {
+            layer.confirm("确认要批量删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/batDeleteTask", { iid: $(e.currentTarget).data("iid") }, function (data) {
+                    layer.alert(data, {
+                        title: "删除操作",
+                        btn: ['确定']
+                    },
+                        function (index, item) {
+                            //layer.close(index);
+                            if (data == "批量删除成功") {
+                                location.reload();
+                            }
+                            else {
+                                layer.close(index);
+                            }
+
+                        });
+                });
+            });
+        }
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+
+

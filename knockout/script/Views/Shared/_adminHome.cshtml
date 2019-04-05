@@ -1,0 +1,32 @@
+﻿@{
+    Layout = "_AdminHomeLayout.cshtml";
+}
+@section header{
+
+
+    <!-- BEGIN NAVIGATION -->
+    <ul>
+
+
+        <li class='@(ViewContext.RouteData.Values["controller"].ToString().Equals("Home", StringComparison.OrdinalIgnoreCase) ? "active" : "")'><a href="~/admin/home" aria-expanded="true">首页</a></li>
+        <li class="@(ViewContext.RouteData.Values["controller"].ToString().Equals("customer", StringComparison.OrdinalIgnoreCase) ? "active" : "")"><a href="~/admin/customer" aria-expanded="true">客户管理</a></li>
+        <li class="@(ViewContext.RouteData.Values["controller"].ToString().Equals("work", StringComparison.OrdinalIgnoreCase) ? "active" : "")"><a href="~/admin/work" aria-expanded="true">工作日志</a></li>
+        @if (ViewBag.AdminInfo.RoleLevel > 0)
+        {
+            <li class="@(ViewContext.RouteData.Values["controller"].ToString().Equals("UserManage", StringComparison.OrdinalIgnoreCase) ? "active" : "")"><a href="~/admin/UserManage/userlist" aria-expanded="true">员工管理</a></li>
+
+            <li class="@(ViewContext.RouteData.Values["controller"].ToString().Equals("UserAdmin", StringComparison.OrdinalIgnoreCase)? "active" : "")"><a href="~/admin/UserAdmin/UserRoleAdminList" aria-expanded="true">角色管理</a></li>
+        }
+
+
+
+    </ul>
+    <!-- END NAVIGATION -->
+    @RenderSection("pageStyle", required: false)
+    @RenderSection("themeStyle", required: false)
+}
+
+@RenderBody()
+@section scripts{
+    @RenderSection("scripts", required: false)
+}

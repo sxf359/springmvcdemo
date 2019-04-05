@@ -1,0 +1,148 @@
+﻿@model List<LMSoft.CMS.ViewModels.CustomerViewModel>
+@{
+    ViewBag.Title = "中之天客户管理系统";
+}
+@section pageStyle{
+    <style>
+        #dlgPopupModal .modal-dialog {
+            width: 100%;
+            max-width: 500px;
+        }
+    </style>
+}
+<div class="row">
+    <div class="col-md-12">
+        <h3>@ViewBag.Title</h3>
+        <p>
+            <a href="javascript:;" class="h4 btn btn-info" data-bind="click:showChangePassword">更改密码</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:;" class="h4 btn btn-info"  data-bind="click:ShowUpdateAccountInfo">修改资料</a>
+        </p>
+        <h3>一天内要过期的客户</h3>
+        <table class="table table-bordered  table-striped" style="width:500px;">
+            <tr>
+                <th>真实姓名</th>
+                <th>手机号</th>
+                <th>操作</th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Phone</td>
+                    <td>@Html.ActionLink("添加回访", "CustomerReviewAddForCustomer", "customer", new { gid = item.GID },null)</td>
+                </tr>
+            }
+
+        </table>
+
+    </div>
+</div>
+@section scripts{
+<script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+<script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+<script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+<script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script> 
+<script src="~/Scripts/app/admin/UserManage/UserManage.js"></script>
+<script src="~/Scripts/app/appBase.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+
+
+        });
+        //密码修改弹出框 
+        function showChangePassword(item, e) {
+            $n = $(e.currentTarget);
+            var vm = page.VM.PopupModalVM;
+            vm.option.title("修改密码");
+            vm.option.modallg(true);
+            vm.option.showCloseButton(true);
+            vm.option.showOKButton(true);
+            //当弹出框中确定按钮不可用时，使其可用，此问题在firefox浏览器中出现 
+            if ($(".submit").attr("disabled") == "disabled") {
+                $(".submit").removeAttr("disabled");
+            }
+            vm.ChangePasswordVM = ko.mapping.fromJS({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
+
+            vm.option.ok = function () { ChangePassword(vm); };
+            vm.templateToUse("tmpl_blank");
+            vm.templateToUse("tmpl_ChangePassword");
+            $("#dlgPopupModal").modal("show");
+            //alert("a");
+            return false;
+        }
+
+
+        //重置密码
+        function ChangePassword(vm) {
+            if ($.IsNullOrEmpty(vm.ChangePasswordVM.oldPassword()))
+            {
+                alert("请输入旧密码");
+                return;
+            }
+            if ($.IsNullOrEmpty(vm.ChangePasswordVM.newPassword())) {
+                alert("请输入新密码");
+                return;
+            }
+            //console.info("abc");
+            if (vm.ChangePasswordVM.newPassword() != vm.ChangePasswordVM.confirmNewPassword()) {
+                alert("两次输入密码不一致");
+                return;
+            }
+
+            $.post("/admin/home/ChangePassword", { oldPassword: vm.ChangePasswordVM.oldPassword(), newPassword: vm.ChangePasswordVM.newPassword() }, function (data) {
+                if (data.indexOf("无权限") >= 0) {
+                    myModal.info("您无权进行此项操作");
+                    $("#dlgPopupModal").modal("hide");
+                }
+                else {
+                    myModal.info(data);
+                    $("#dlgPopupModal").modal("hide");
+                }
+            });
+
+        }
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+<script type="text/html" id="tmpl_AccountInfo">
+    <form class="form-horizontal" data-bind="with:AccountInfoVM">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">手机</label>
+            <div class="col-sm-9">
+                <input class="form-control" data-bind="value:PhoneNumber" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">真实姓名</label>
+            <div class="col-sm-9">
+                <input class="form-control" data-bind="value:RealName" />
+                <input type="hidden" data-bind="value:Id" />
+            </div>
+        </div>
+    </form>
+</script>
+<script type="text/html" id="tmpl_ChangePassword">
+    <form class="form-horizontal" data-bind="with:ChangePasswordVM">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">当前密码</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="password" data-bind="value:oldPassword" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">新密码</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="password" data-bind="value:newPassword" />                 
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">新密码确认</label>
+            <div class="col-sm-9">
+                <input class="form-control" type="password" data-bind="value:confirmNewPassword" />                 
+            </div>
+        </div>
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml") 

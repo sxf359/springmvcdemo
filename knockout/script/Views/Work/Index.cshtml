@@ -1,0 +1,174 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.Models.DailyLog>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "日志管理";
+    Layout = "_work.cshtml";
+}
+
+@section pageStyle{
+    <style>
+        .collapse {
+            display: block;
+        }
+    </style>
+}
+
+<div class=" list">
+    @*<div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+            {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="position-name" name="name" placeholder="名称" value="@ViewBag.name">&nbsp;&nbsp;
+
+
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>*@
+
+    <div>
+        @Html.ActionLink("添加日志", "AddDailyLog", null, new { @class = "btn btn-primary btn-sm", style = "float:right;margin-right:15px;margin:5px 15px;" })
+    </div>
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="nowrap">编号</th>
+                    <th class="nowrap">标题</th>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <th class="nowrap">主管</th>
+                        <th class="nowrap">组长</th>
+                        <th class="nowrap">话务员</th>
+                    }
+                    <th class="nowrap">是否已交</th>
+                    <th class="nowrap">日期</th>
+
+
+                    <th class="nowrap">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class=" ">@item.IID</td>
+                    <td class="">@(item.Title)</td>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <td class="thisAdmin">@item.Director</td>
+                        <td class="thisAdmin">@item.GroupLeader</td>
+                        <td class="thisAdmin">@item.AdminId</td>
+                    }
+                    <td class="">@(item.CheckTime != null ? "已交" : "未交")</td>
+                    <td class="">@(item.CreateTime)</td>
+
+                    <td class="">
+                        @if (ViewBag.AdminInfo.RoleLevel == 0)
+                        {
+                            @Html.ActionLink("修改日志", "adddailylog", new { gid = item.GID })
+                            <a href="javascript:;" data-gid="@item.GID" data-bind="click:SendLog">交日志</a>
+                        }
+                       
+                        @Html.ActionLink("查看日志", "QueryLog", new { gid = item.GID })
+                    </td>
+                </tr>
+
+            }
+
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+   {
+       title = ViewBag.title,
+       pageIndex = page
+   }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/layer-v3.0.3/layer/layer.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/Customer/Customer.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //管理员名加载
+            $(".thisAdmin").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetadminName", { adminId: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+
+
+        });
+
+        function SendLog(item, e) {
+            layer.confirm("确认要交日志吗？", { title: "交日志确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/work/sendlog", { gid: $(e.currentTarget).data("gid") }, function (data) {
+                    layer.alert(data, {
+                        title: "交日志操作",
+                        btn: ['确定']
+                    },
+                        function (index, item) {
+                            if (data == "已交日志") {
+                                location.reload();
+                            }
+                            else {
+                                layer.close(index);
+                            }
+
+                        });
+                });
+            });
+        }
+
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+
+
+
+
+

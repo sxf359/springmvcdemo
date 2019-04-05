@@ -1,0 +1,36 @@
+﻿
+<div class="modal fade" id="uploadfile">
+    <div class="modal-dialog ">
+        <div class="modal-content" data-bind="with:uploadfileVM">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" data-bind="text:option.title">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <form id="uploadimg_form" name="uploadimg_form" style="text-align: center;">
+                    <div class="fileinput fileinput-new" data-provides="fileinput" id="image_div">
+                        <div class="fileinput-new thumbnail" style="">
+                            <img src="~/gallery/images/none.png" data-bind="attr:{src:'/gallery/'+(image()?image():'images/none.png')}" style="max-width:100%;max-height:200px;border:5px white solid;min-height:180px;min-width:120px;" id="Avatar_img" />
+                        </div>
+                        <div class="fileinput-preview fileinput-exists thumbnail" style="max-width: 200px; max-height: 150px;">
+                        </div>
+                        <div>
+                            <span class="btn default btn-file">
+                                <span class="fileinput-new">选择图片</span>
+                                <span class="fileinput-exists">另选图片 </span>
+                                <input type="file" name="..." id="file_upload">
+                            </span>
+                            <a id="pickfiles" href="javascript:;" class="hidden">[Select files]</a>
+                            <a href="javascript:;" class="btn default fileinput-exists" id="uploadAndSave">上传并保存 </a>
+                            <a href="javascript:;" class="btn default fileinput-exists" data-dismiss="fileinput">删除 </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" data-dismiss="modal"><i class="fa fa-times"></i>关闭</button>
+                <button type="button" class="btn btn-primary hidden" data-bind="">确定</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

@@ -1,0 +1,478 @@
+﻿@model PagedList.IPagedList<LMSoft.CMS.ViewModels.CustomerViewModel>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "客户列表";
+    Layout = "_customer.cshtml";
+}
+
+@section pageStyle{
+    <style>
+        .collapse {
+            display: block;
+        }
+
+        #dlgPopupModal .modal-dialog {
+            width: 100%;
+            max-width: 500px; 
+        }
+    </style>
+}
+
+<div class=" list">
+    <div class="list-header">
+        @using (Html.BeginForm(ViewContext.RouteData.Values["action"].ToString(), ViewContext.RouteData.Values["Controller"].ToString(), FormMethod.Post, new { @class = "form-inline", id = "search_form", role = "form", style = "" }))
+            {
+            @Html.AntiForgeryToken()
+
+
+            <div class="col-xs-12 no-padding">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+
+                        <div class="collapse navbar-collapse">
+                            <ul class="nav navbar-nav">
+                                <li class="">
+                                    <input type="text" class="form-control  input-sm" id="name" name="name" placeholder="姓名、手机号、添加人" value="@ViewBag.name">&nbsp;&nbsp;
+
+                                    &nbsp;&nbsp;大类：<select name="level1" id="level1" class="prov select2-container" style="width: 150px;"> </select>
+                                    &nbsp;&nbsp;小类：<select name="level2" id="level2" class="prov select2-container" style="width: 150px;"> </select>
+                                    &nbsp;&nbsp;话务员：<select name="op" id="op" class="prov select2-container" style="width: 150px;"> </select>
+                                    &nbsp;&nbsp;<input type="checkbox" id="paixu" name="paixu" value="1" @(ViewBag.paixu == 1 ? "checked" : "") />仅查看有回访客户
+                                </li>
+
+                                <li>
+                                    <div class="btn-group  navbar-right" role="group" aria-label="...">
+                                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i><strong>筛选</strong></button>
+                                        <a href="javascript:;" class="btn btn-primary " style="margin-left:15px;height:30px;" data-bind="visible:@ViewBag.AdminInfo.RoleLevel>=2,click:CustomerExportToExcel"   >导出选定到Excel</a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="col-xs-12 text-danger @(ViewBag.op<=0?"hidden":"")" style="margin-top:15px;"> @ViewBag.numberInfo</div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <div class="text-right">
+        @if (ViewBag.AdminInfo.RoleLevel > 0)
+        {
+            <a href="javascript:;" data-bind="click:showRecycle" class="btn btn-primary btn-sm">批量回收号码</a>
+            <a href="javascript:;" data-bind="click:BatFrozenCustomer" class="btn btn-primary btn-sm">批量冻结</a>
+            <a href="javascript:;" data-bind="click:BatUnFrozenCustomer" class="btn btn-primary btn-sm">批量解冻</a>
+        }
+        @if (ViewBag.AdminInfo.RoleLevel == 0)
+        {
+            @Html.ActionLink("添加客户", "customeradd", null, new { @class = "btn btn-primary btn-sm" })
+        }
+    </div>
+    <div class=" list-item padding">
+
+        <table class="table table-bordered  table-striped">
+            <thead>
+                <tr>
+                    <th class="nowrap">编号</th>
+                    <th class="nowrap">手机/电话</th>
+                    <th class="nowrap">姓名</th>
+                    <th class="nowrap">添加人</th>
+                    <th class="nowrap">类别</th>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <th class="nowrap">主管</th>
+                        <th class="nowrap">组长</th>
+                        <th class="nowrap">话务员</th>
+                    }
+                    <th class="nowrap">意向</th>
+                    <th class="nowrap">剩天数</th>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <th class="nowrap">冻结</th>
+                        <th class="nowrap">日期</th>
+                    }
+                    else
+                    {
+                        <th class="nowrap">最后回访</th>
+                    }
+                    <th class="nowrap">成交</th>
+                    <th class="nowrap">操作</th>
+                </tr>
+            </thead>
+
+            @foreach (var item in Model)
+            {
+                <tr class="">
+                    <td class=" ">@item.IID</td>
+                    <td class="tc phoneInfo">@(item.Phone)</td>
+                    <td class="">@(item.Name)</td>
+                    <td class="">@(item.CreateBy)</td>
+                    <td class="thisSort">@(item.SortId)</td>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <td class="thisAdmin">@item.Director</td>
+                        <td class="thisAdmin">@item.GroupLeader</td>
+                        <td class="thisAdmin">@item.AdminId</td>
+                    }
+                    <td class="thisIntentionnality">@item.IntentionalityId</td>
+                    <td class="@(item.ReviewRemainDaysOrder<=2?" text-red":"")">@(item.ReviewRemainDaysOrder)</td>
+                    @if (ViewBag.AdminInfo.RoleLevel > 0)
+                    {
+                        <td class=" ">@(item.Frozen ? "已冻结" : "未冻结")</td>
+                        <td class="">@(item.CreateTime)</td>
+                    }
+                    else
+                    {
+                        <td class="">@item.LastCustomerReviewMark</td>
+                    }
+                    <td class="">@(item.Dealed == 1 ? "已成交" : "未成交")</td>
+                    <td class="">
+                        @Html.ActionLink("修改", "Customeradd", new { gid = item.GID })
+                        @if (ViewBag.AdminInfo.RoleLevel > 0)
+                        {
+
+                            <a href="javascript:;" data-gid="@item.GID" data-bind="click:DeleteCustomer">删除</a>
+                        }
+                        @if (item.Dealed == 0)
+                        {
+                            @Html.ActionLink("添加回访", "CustomerReviewAddForCustomer", new { gid = item.GID })
+                        }
+
+                        <a href="javascript:;" data-iid="@item.IID" data-bind="click:QueryReview">查看回访</a>
+                        @if (ViewBag.AdminInfo.RoleLevel == 0 && item.Dealed == 0)
+                        {
+                            <a href="javascript:;" data-gid="@item.GID" data-bind="click:PhoneReport">上报号码</a>
+                            <a href="javascript:;" data-gid="@item.GID" data-bind="click:ChangeDealed">成交</a>
+                        }
+                        @if (ViewBag.AdminInfo.RoleLevel >= 2)
+                        {
+                            <a href="javascript:;" data-phone="@item.Phone" data-bind="click:CustomerReviewDeleteByPhone">删除回访</a>
+
+                        }
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td colspan="14">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th class="col-xs-2">回访人</th>
+                                <th class="col-xs-4">备注</th>
+                                <th class="col-xs-2">回访方式</th>
+                                <th class="col-xs-2">时间</th>
+                                <th class="col-xs-2">操作</th>
+                            </tr>
+
+                            @foreach (var subItem in item.CustomerReviewViewCollection)
+                            {
+                                <tr>
+                                    <td class="col-xs-2 thisAdmin">@subItem.AdminId</td>
+                                    <td class="col-xs-4">@subItem.Mark</td>
+                                    <td class="col-xs-2 thisMode">@subItem.ReviewMode</td>
+                                    <td class="col-xs-2">@subItem.CreateTime</td>
+                                    <td class="col-xs-2"><a href="javascript:;" data-gid="@subItem.GID" data-bind="click:CustomerReviewDelete">删除</a></td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
+                </tr>
+            }
+
+        </table>
+        @Html.PagedListPager(Model, page => Url.Action(ViewContext.RouteData.Values["action"].ToString(), new
+   {
+       name = ViewBag.name,
+       level1 = ViewBag.level1,
+       level2 = ViewBag.level2,
+       op = ViewBag.op,
+       paixu = ViewBag.paixu,
+       pageIndex = page
+   }),
+            new PagedListRenderOptions
+            {
+                LinkToFirstPageFormat = "<span class='glyphicon glyphicon-fast-backward'></span>",
+                LinkToPreviousPageFormat = "<span class='glyphicon glyphicon-backward'></span>",
+                LinkToNextPageFormat = "<span class='glyphicon glyphicon-forward'></span>",
+                LinkToLastPageFormat = "<span class='glyphicon glyphicon-fast-forward'></span>",
+                DisplayPageCountAndCurrentLocation = true,
+                PageCountAndCurrentLocationFormat = "当前第 {0} 页/共 {1} 页",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "共{2}条记录,显示第{0}-{1}条"
+            })
+
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/plugins/LMSoft/ko.popUp.js"></script>
+    <script src="~/Scripts/app/shared/dialog/_PopupModal.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.renderTemplateX.js"></script>
+    <script src="~/Scripts/plugins/LMSoft/ko.select2 2.0.js"></script>
+    <script src="~/Scripts/plugins/layer-v3.0.3/layer/layer.js"></script>
+    <script src="~/Scripts/app/appBase.js"></script>
+    <script src="~/Scripts/app/admin/Customer/Customer.js"></script>
+    <script type="text/javascript">
+         var level1 =@ViewBag.level1;
+        var level2 =@ViewBag.level2;
+
+        $(function () {
+            $.post("/service/getcustomersortlist", { parent: 0 }, function (data) {
+                if ($.isArray(data))
+                {
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#level1").select2({
+                        data: data
+                    });
+                    if (level1 > 0) {
+                        $("#level1").val(level1).trigger("change");
+                        //console.info($("#level1").val());
+
+
+                    }
+                    else {
+                        var arr = [];
+                        arr.unshift({ id: 0, text: "请选择" });
+                        $("#level2").select2({
+                            data: arr
+                        });
+                    }
+                }
+            });
+
+
+            $("#level1").change(function () {
+                //console.info($("#level1").val());
+                $.post("/service/getcustomersortlist", { parent: $("#level1").val() }, function (data) {
+                    $("#level2").empty();
+                    if ($.isArray(data)) {
+                        data.unshift({ id: 0, text: "请选择" });
+                        $("#level2").select2({
+                            data: data
+                        });
+                        if (level2 > 0) {
+                            setTimeout($("#level2").val(level2).trigger("change"), 1000);
+                            //console.info($("#level2").val());
+                        }
+                    }
+                });
+            });
+            //类名加载
+            $(".thisSort").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetCustomerSortName", { iid: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            //管理员名加载
+            $(".thisAdmin").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetadminName", { adminId: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            //意向度加载
+            $(".thisIntentionnality").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/GetIntentionality", { iid: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            $(".thisReviewStatus").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                $.post("/service/Getreviewstatus", { status: text }, function (data) {
+                    $this.text(data);
+                });
+            });
+            $(".thisMode").each(function (index, item) {
+                var $this = $(this);
+                var text = $this.text().trim();
+                if (ex.test(text)) {
+                    // 则为整数
+                    $.post("/service/GetReviewMode", { status: text }, function (data) {
+                        $this.text(data);
+                    });
+                }
+
+            });
+            var adminid =@ViewBag.AdminInfo.IID;
+            var op=@ViewBag.op;
+            $.post("/service/GetOperatorList", { adminId: adminid }, function (data) {
+                if ($.isArray(data)) {
+                    data.unshift({ id: 0, text: "请选择" });
+                    $("#op").select2({
+                        data: data
+                    });
+                    if (op > 0) {
+                        $("#op").val(op).trigger("change");
+                    }
+                }
+            });
+
+            $(".phoneInfo").each(function (index) {
+                var self = $(this);
+                $.post("/service/GetPhoneAddressInfo", { phone: self.text() }, function (data) {
+                    self.text(self.text() + "  " + data);
+                });
+            });
+        });
+
+        var ex = /^\d+$/;
+        function BatFrozenCustomer()
+        {
+            layer.confirm("确认要批量冻结吗？", { title: "批量冻结确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/BatFrozenCustomer", {name:$("#name").val(),level1:$("#level1").val(),level2:$("#level2").val(),op:$("#op").val()}, function (data) {
+                    layer.alert(data, { title: "批量冻结", btn: ['确定'] }, function (index, item) {
+                        location.reload();
+                    });
+                });
+            });
+        }
+        function BatUnFrozenCustomer(item,e) {
+
+            layer.confirm("确认要批量解冻吗？", { title: "批量解冻确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/BatUnFrozenCustomer", { }, function (data) {
+                    layer.alert(data, { title: "批量解冻", btn: ['确定'] }, function (index, item) {
+                        location.reload();
+                    });
+                });
+            });
+        }
+        /**
+         * 成交操作
+         */
+        function ChangeDealed(item,e)
+        {
+            var $n = $(e.currentTarget);
+            console.info($n);
+            layer.confirm("确认要成交吗？", { title: "成交确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/ChangeDealed", { gid: $(e.currentTarget).data("gid")}, function (data) {
+                    layer.alert(data, { title: "成交", btn: ['确定'] }, function (index, item) {
+                        if (data != "设定成交成功")
+                        {
+                            layer.close(index);
+                        }
+                        else
+                        {
+                            location.reload();
+                        }
+
+                    });
+                });
+            });
+        }
+        //上报号码
+        function PhoneReport(item, e)
+        {
+            var $n = $(e.currentTarget);
+            console.info($n);
+            layer.confirm("确认要上报吗？", { title: "上报号码确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/PhoneReport", { gid: $(e.currentTarget).data("gid") }, function (data) {
+                    layer.alert(data, { title: "上报号码", btn: ['确定'] }, function (index, item) {
+                        if (data != "上报号码成功") {
+                            layer.close(index);
+                        }
+                        else {
+                            location.reload();
+                        }
+
+                    });
+                });
+            });
+        }
+        //按手机号删除回访
+        function CustomerReviewDeleteByPhone(item, e)
+        {
+            var $n = $(e.currentTarget);
+            console.info($n);
+            layer.confirm("确认要删除该手机号的所有回访记录吗？删除后不能恢复", { title: "批量删除回访确认" }, function (index) {
+                layer.close(index);
+                $.post("/admin/customer/CustomerReviewDeleteByPhone", { phone: $(e.currentTarget).data("phone") }, function (data) {
+                    layer.alert(data, { title: "批量删除回访", btn: ['确定'] }, function (index, item) {
+                        if (data != "批量删除回访记录成功") {
+                            layer.close(index);
+                        }
+                        else {
+                            location.reload();
+                        }
+
+                    });
+                });
+            });
+        }
+        
+        //批量回收
+        function showRecycle(item, e) {
+            $n = $(e.currentTarget);
+            var vm = page.VM.PopupModalVM;
+            vm.option.title("批量回收号码");
+            vm.option.modallg(true);
+            vm.option.showCloseButton(true);
+            vm.option.showOKButton(true);
+            //当弹出框中确定按钮不可用时，使其可用，此问题在firefox浏览器中出现
+            if ($(".submit").attr("disabled") == "disabled") {
+                $(".submit").removeAttr("disabled");
+            }
+            vm.RecycleVM = ko.mapping.fromJS({ username: "" });
+
+            vm.option.ok = function () { Recycle(vm); };
+            vm.templateToUse("tmpl_blank");
+            vm.templateToUse("tmpl_Recycle");
+            $("#dlgPopupModal").modal("show");
+            //alert("a");
+            return false;
+        }
+
+
+        //重置密码
+        function Recycle(vm) {
+            if ($.IsNullOrEmpty(vm.RecycleVM.username())) {
+                alert("请输入登录名");
+                return;
+            }
+            $.post("/admin/customer/BatRecyclePhone", { username: vm.RecycleVM.username() }, function (data) {
+                if (data.indexOf("无权限") >= 0) {
+                    myModal.info("您无权进行此项操作");
+                    $("#dlgPopupModal").modal("hide");
+                }
+                else {
+                    myModal.info(data);
+                    if (data.indexOf("批量回收成功") >= 0)
+                    {
+                        location.reload();
+                    }
+                    $("#dlgPopupModal").modal("hide");
+                }
+            });
+
+        }
+        function CustomerExportToExcel(item, e) {
+            location.href = "/admin/customer/customerexporttoexcel?level1=" + $("#level1").val() + "&level2=" + $("#level2").val() ;
+            console.info(location.href);
+        }
+    </script>
+}
+<script type="text/html" id="tmpl_blank">
+</script>
+<script type="text/html" id="tmpl_Recycle">
+    <form class="form-horizontal" data-bind="with:RecycleVM">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">登录名</label>
+            <div class="col-sm-9">
+                <input class="form-control" placeholder="输入话务员登录名" data-bind="value:username" />
+            </div>
+        </div>
+    </form>
+</script>
+@Html.Partial("~/Views/Shared/dialog/_PopupModal.cshtml")
+
+
+
+

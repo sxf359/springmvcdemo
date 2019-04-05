@@ -1,0 +1,36 @@
+﻿@{
+    Layout = "~/Areas/admin/Views/Shared/_adminHome.cshtml";
+
+}
+
+@section pageStyle{
+
+    @RenderSection("pageStyle", required: false)
+}
+<div class="row ">
+    <!-- #region 导览  -->
+    <div class="col-md-2">
+        <div class=" list">
+            <div class=" list-item padding">
+                <h3><i class="fa fa-tags"></i>工作日志</h3>
+                 
+                <div class="list-content-border @(new string[] { "index", "adddailylog","QueryLog".ToLower() }.Contains(ViewContext.RouteData.Values["action"].ToString().ToLower())   ? "active-item" : "") ">
+                    <a href="/admin/work/index">日志管理</a>
+                 </div>
+
+              </div>
+        </div>
+    </div>
+    <!-- #region 导览  -->
+    <!-- #region 主页  -->
+    <div class="col-md-10">
+        @RenderBody()
+    </div>
+    <!-- #region 主页  -->
+</div>
+
+@section scripts{
+
+    @RenderSection("scripts", required: false)
+
+}
